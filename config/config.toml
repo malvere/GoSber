@@ -1,0 +1,2 @@
+database_url = "host=localhost dbname=sberscrape sslmode=disable"
+sqlite_url = ":memory:"

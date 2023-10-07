@@ -27,12 +27,3 @@ jobs:
 
     - name: Build for ${{ matrix.os }} ${{ matrix.arch }}
       run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o sber-scrape-linux-386 -v ./cmd/sber-scrape
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: sber-scrape-${{ matrix.os }}-${{ matrix.arch }}
-        path: ./myapp
-
-    - name: Clean up
-      run: rm myapp
-      

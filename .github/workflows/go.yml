@@ -14,8 +14,8 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [darwin, windows, linux, linux]
-        arch: [amd64, 386]
+        os: [darwin, windows, linux]
+        arch: [amd64]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -27,3 +27,6 @@ jobs:
 
     - name: Build for ${{ matrix.os }} ${{ matrix.arch }}
       run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o sber-scrape-linux-386 -v ./cmd/sber-scrape
+    - name: Build for linux 386
+      run: GOOS=linux GOARCH=386 go build -o sber-scrape-linux-386 -v ./cmd/sber-scrape
+      

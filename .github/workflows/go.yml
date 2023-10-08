@@ -34,4 +34,6 @@ jobs:
       with:
         name: sber-scrape-linux-386
         path: .
+        name: sber-scrape-${{matrix.os}}-amd-64
+        path: .
       

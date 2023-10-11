@@ -34,6 +34,9 @@ jobs:
       with:
         name: sber-scrape-linux-386
         path: .
+    - name: Upload amd-64 artifacts
+      uses: actions/upload-artifact@v3
+      with:
         name: sber-scrape-${{matrix.os}}-amd-64
         path: .
       

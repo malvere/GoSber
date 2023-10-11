@@ -1,5 +1,8 @@
 name: Build and Release
 
+on:
+  create
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,6 +43,3 @@ jobs:
         files: ./bin/sber-scrape* # Change this to match your binary file names
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Release URL
-      run: echo "Release URL: ${{ steps.create_release.outputs.upload_url }}"

@@ -41,7 +41,7 @@ jobs:
     - name: Download Binaries
       uses: actions/download-artifact@v3
       with:
-        name: binaries
+        name: sber-scrape*
 
     - name: Create Release
       id: create_release

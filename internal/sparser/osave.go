@@ -23,9 +23,8 @@ func createFile(fileName string) (*os.File, *csv.Writer, error) {
 	if err != nil {
 		log.Print(err)
 	}
-	// defer file.Close()
+
 	writer := csv.NewWriter(file)
-	// defer writer.Flush()
 	err = writer.Write(headers)
 	if err != nil {
 		log.Print(err)

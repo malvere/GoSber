@@ -14,11 +14,16 @@ import (
 
 var (
 	configPath string
+	urlFlag    string
+	searchFlag string
+	parseURL   string
 )
 
 // ConfigFile
 func init() {
 	flag.StringVar(&configPath, "config-path", "config/config.toml", "path to config file")
+	flag.StringVar(&searchFlag, "s", "", "search")
+	flag.StringVar(&urlFlag, "u", "", "parse url")
 }
 func main() {
 	flag.Parse()
@@ -28,13 +33,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Define the URL
-	tag := url.QueryEscape("Моторное масло 4л")
-	url := fmt.Sprintf("https://megamarket.ru/catalog/?q=%s", tag)
 
-	// Send a GET request to the URL
+	// Setting the URL depending on input flags
+	// If "-s" is passed -> search url
+	// If "-u" is passed -> parsing specific catalog
+	if searchFlag != "" {
+		log.Println("Searching for: ", searchFlag)
+		parseURL = fmt.Sprintf(
+			"https://megamarket.ru/catalog/?q=%s",
+			url.QueryEscape(searchFlag),
+		)
+	} else if urlFlag != "" {
+		log.Println("Scraping: ", urlFlag)
+		parseURL = urlFlag
+	} else {
+		parseURL = "https://megamarket.ru/catalog/?q=нарзан"
+	}
 
-	if err := sparser.Start(config, url); err != nil {
+	// Send a GET request to the URL and parse
+	if err := sparser.Start(config, parseURL); err != nil {
 		log.Fatal(err)
 	}
 }

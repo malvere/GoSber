@@ -39,7 +39,13 @@ func GetHtml(url string, store store.Store) error {
 	doc.Find(".item-block").Each(func(index int, itemBlock *goquery.Selection) {
 		// Helper function to extract text from an element and trim whitespace
 		getText := func(selector string) string {
-			return strings.TrimSpace(itemBlock.Find(selector).Text())
+			return strings.TrimSpace(
+				strings.ReplaceAll(
+					itemBlock.Find(selector).Text(),
+					"\t",
+					"",
+				),
+			)
 		}
 		convInt := func(str string) (int, error) {
 			if str != "" {
@@ -83,6 +89,7 @@ func GetHtml(url string, store store.Store) error {
 		fmt.Println("Discount: ", discount)
 		fmt.Println("Product ID", productID)
 		fmt.Println("URL: ", link)
+		// fmt.Println("-" * 10)
 	})
 	return nil
 }

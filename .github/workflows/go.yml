@@ -26,17 +26,17 @@ jobs:
         go-version: '1.20'
 
     - name: Build for ${{ matrix.os }} ${{ matrix.arch }}
-      run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o sber-scrape-linux-386 -v ./cmd/sber-scrape
+      run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o ./bin/sber-scrape-linux-386 -v ./cmd/sber-scrape
     - name: Build for linux 386
-      run: GOOS=linux GOARCH=386 go build -o sber-scrape-linux-386 -v ./cmd/sber-scrape
+      run: GOOS=linux GOARCH=386 go build -o ./bin/sber-scrape-linux-386 -v ./cmd/sber-scrape
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: sber-scrape-linux-386
-        path: .
+        path: ./bin/
     - name: Upload amd-64 artifacts
       uses: actions/upload-artifact@v3
       with:
         name: sber-scrape-${{matrix.os}}-amd-64
-        path: .
+        path: ./bin/
       

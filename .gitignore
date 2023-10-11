@@ -2,4 +2,5 @@ sber-scrape
 sber-scrape-win-x86.exe
 .github/workflows/go.yml
 .DS_Store
+/bin*
 sber.csv

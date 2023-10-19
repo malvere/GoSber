@@ -4,3 +4,5 @@ sber-scrape-win-x86.exe
 .DS_Store
 /bin*
 sber.csv
+.html
+page.html

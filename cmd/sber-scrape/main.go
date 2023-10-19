@@ -14,14 +14,16 @@ import (
 
 var (
 	configPath string
-	urlFlag    string
+	mode       string
 	searchFlag string
+	urlFlag    string
 	parseURL   string
 )
 
 // ConfigFile
 func init() {
 	flag.StringVar(&configPath, "config-path", "config/config.toml", "path to config file")
+	flag.StringVar(&mode, "m", "web", "mode to run in. <web> makes HTTP requests, while <local> searches for .html file")
 	flag.StringVar(&searchFlag, "s", "", "search")
 	flag.StringVar(&urlFlag, "u", "", "parse url")
 }
@@ -51,7 +53,7 @@ func main() {
 	}
 
 	// Send a GET request to the URL and parse
-	if err := sparser.Start(config, parseURL); err != nil {
+	if err := sparser.Start(config, parseURL, mode); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -8,16 +8,24 @@ import (
 	"sber-scrape/internal/store/sqlstore"
 )
 
-func Start(config *Config, url string) error {
+func Start(config *Config, url string, mode string) error {
 	store, db, err := chooseStore(config)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 	defer db.Close()
-	if err := GetHtml(url, store); err != nil {
-		log.Fatal(err)
+	switch mode {
+	case "web":
+		if err := GetHtml(url, store); err != nil {
+			log.Fatal(err)
+		}
+	case "local":
+		if err := GetLocalHtml("page.html", store); err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	if store, ok := store.(*litestore.Store); ok {
 		log.Print("Preparing .csv file...")
 		CommaSeparated("sber", store)

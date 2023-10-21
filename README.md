@@ -30,7 +30,7 @@ To get started with sber-scrape, follow the instructions below:
 1. Clone this repository:
 
    ```shell
-   git clone https://github.com/malvere/GoSberScrape.git
+   git clone https://github.com/malvere/GoSber.git
    cd GoSberScrape
    ```
 

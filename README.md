@@ -18,7 +18,7 @@ GoSber is a versatile GoLang script for web scraping. It offers multiple modes f
 To get started with sber-scrape, follow the instructions below:
 
 ### Using pre-build executables
-1. Download appropriate executable depending on your platform from [releases](https://github.com/malvere/GoSberScrape/releases)
+1. Download appropriate executable depending on your platform from [releases](https://github.com/malvere/GoSber/releases)
 
 2. Run with with flags if needed
     ```shell

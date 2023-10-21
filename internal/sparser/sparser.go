@@ -105,7 +105,6 @@ func GetLocalHtml(filename string, store store.Store) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	doc.Find(".item-block").Each(func(index int, itemBlock *goquery.Selection) {
 		// Helper function to extract text from an element and trim whitespace
 		getText := func(selector string) string {

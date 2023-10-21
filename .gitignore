@@ -6,3 +6,4 @@ sber-scrape-win-x86.exe
 sber.csv
 .html
 page.html
+.vscode*

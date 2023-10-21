@@ -2,7 +2,6 @@ package sqlstore
 
 import (
 	"database/sql"
-	"log"
 	"sber-scrape/internal/store"
 
 	_ "github.com/lib/pq"
@@ -28,24 +27,4 @@ func (s *Store) Product() store.ProductRepo {
 	}
 	return s.productRepo
 
-}
-
-func (r *ProductRepo) NewTable() error {
-	_, err := r.store.db.Query(
-		`CREATE TABLE IF NOT EXISTS product_data (
-			id SERIAL PRIMARY KEY,
-			title TEXT,
-			price INT,
-			bonuses INT,
-			bonus_percent INT,
-			discount INT,
-			product_id BIGINT,
-			link TEXT
-		)`,
-	)
-	if err != nil {
-		log.Fatalln("Error creating SQLite Table: ", err)
-		return err
-	}
-	return nil
 }

@@ -74,8 +74,13 @@ func chooseStore(config *Config) (store.Store, *sql.DB, error) {
 	// Try to connect to PostgreSQL
 	postgresDB, err := newDB(config.DatabaseURL)
 	if err == nil {
+		s := sqlstore.New(postgresDB)
+		err := s.Product().NewTable()
+		if err != nil {
+			log.Print("Error find")
+		}
 		log.Print("Postgres active")
-		return sqlstore.New(postgresDB), postgresDB, nil
+		return s, postgresDB, nil
 	}
 
 	// If PostgreSQL is not available, use SQLite

@@ -3,6 +3,7 @@ package sqlstore
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"sber-scrape/internal/model"
 	"sber-scrape/internal/store"
@@ -13,7 +14,7 @@ type ProductRepo struct {
 }
 
 func (r *ProductRepo) Create(p *model.Product) error {
-	return r.store.db.QueryRow(
+	_, err := r.store.db.Exec(
 		"INSERT INTO product_data (title, price, bonuses, bonus_percent, discount, product_id, link) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
 		p.Title,
 		p.Price,
@@ -22,7 +23,12 @@ func (r *ProductRepo) Create(p *model.Product) error {
 		p.Discount,
 		p.ProductID,
 		p.Link,
-	).Scan(&p.ID)
+	)
+	// .Scan(&p.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *ProductRepo) FindByProductId(productID int) (*model.Product, error) {
@@ -57,4 +63,35 @@ func (r *ProductRepo) FindAll() (*sql.Rows, error) {
 		return nil, err
 	}
 	return rows, nil
+}
+
+func (r *ProductRepo) NewTable() error {
+	// Check if the table exists
+	query := "SELECT to_regclass('product_data')"
+	var tableName string
+	if err := r.store.db.QueryRow(query).Scan(&tableName); err != nil {
+		fmt.Print("Found nothind, creating table >>>")
+		// If the table doesn't exist, create it
+		return r.createTable()
+	}
+	return nil
+}
+
+func (r *ProductRepo) createTable() error {
+	_, err := r.store.db.Exec(`
+			CREATE TABLE IF NOT EXISTS product_data (
+				id SERIAL PRIMARY KEY,
+				title TEXT,
+				price INT,
+				bonuses INT,
+				bonus_percent INT,
+				discount INT,
+				product_id BIGINT,
+				link TEXT
+			)
+		`)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -30,12 +30,13 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := sparser.NewConfig()
-	_, err := toml.DecodeFS(cfg.ConfigFile, "config.toml", config)
-	if err != nil {
-		log.Fatal(err)
+	config, isEnvLoaded := sparser.NewConfig()
+	if !isEnvLoaded {
+		_, err := toml.DecodeFS(cfg.ConfigFile, "config.toml", config)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-
 	// Setting the URL depending on input flags
 	// If "-s" is passed -> search url
 	// If "-u" is passed -> parsing specific catalog
@@ -55,5 +56,6 @@ func main() {
 	// Send a GET request to the URL and parse
 	if err := sparser.Start(config, parseURL, mode); err != nil {
 		log.Fatal(err)
+		return
 	}
 }

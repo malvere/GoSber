@@ -2,6 +2,7 @@ package sparser
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"sber-scrape/internal/store"
 	"sber-scrape/internal/store/litestore"
@@ -9,7 +10,7 @@ import (
 )
 
 func Start(config *Config, url string, mode string) error {
-	store, db, err := chooseStore(config)
+	store, db, err := selDB(config)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -17,7 +18,7 @@ func Start(config *Config, url string, mode string) error {
 	defer db.Close()
 	switch mode {
 	case "web":
-		if err := GetHtml(url, store); err != nil {
+		if err := GetPages(url, store, 6); err != nil {
 			log.Fatal(err)
 		}
 	case "local":
@@ -36,61 +37,35 @@ func Start(config *Config, url string, mode string) error {
 	return nil
 }
 
-func newDB(databaseURL string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", databaseURL)
-	if err != nil {
-		log.Fatal("PG DB")
-		log.Fatal(err)
-		return nil, err
+func selDB(config *Config) (store.Store, *sql.DB, error) {
+	var s store.Store
+	databaseDrivers := map[string]string{
+		"postgres": config.DatabaseURL,
+		"sqlite":   config.SQLiteURL,
 	}
-
-	if err := db.Ping(); err != nil {
-		log.Print("PING")
-		log.Print(err)
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func newLiteDB(databaseURL string) (*sql.DB, error) {
-	db, err := sql.Open("sqlite", databaseURL)
-	if err != nil {
-		log.Fatal("SQ")
-		log.Fatal(err)
-		return nil, err
-	}
-
-	if err := db.Ping(); err != nil {
-		log.Print("SQLite")
-		log.Fatal(err)
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func chooseStore(config *Config) (store.Store, *sql.DB, error) {
-	// Try to connect to PostgreSQL
-	postgresDB, err := newDB(config.DatabaseURL)
-	if err == nil {
-		s := sqlstore.New(postgresDB)
-		err := s.Product().NewTable()
+	for driver, url := range databaseDrivers {
+		db, err := sql.Open(driver, url)
 		if err != nil {
-			log.Print("Error find")
+			log.Printf("Driver '%s' is not active, using", driver)
+			continue
 		}
-		log.Print("Postgres active")
-		return s, postgresDB, nil
-	}
+		if err := db.Ping(); err != nil {
+			log.Printf("Could not ping '%s' driver", driver)
+			continue
+		}
 
-	// If PostgreSQL is not available, use SQLite
-	sqliteDB, err := newLiteDB(config.SQLiteURL)
-	if err != nil {
-		log.Fatal("SQLite not active")
-		return nil, nil, err
+		if driver == "postgres" {
+			s = sqlstore.New(db)
+		} else {
+			s = litestore.New(db)
+		}
+
+		err = s.Product().NewTable()
+		if err != nil {
+			log.Printf("Something went wrong while creating tables: %s", err)
+		}
+		log.Printf("Driver '%s' is active", driver)
+		return s, db, nil
 	}
-	s := litestore.New(sqliteDB)
-	s.Product().NewTable()
-	log.Print("SQLite active")
-	return s, sqliteDB, nil
+	return nil, nil, errors.New("could not connect to DB")
 }

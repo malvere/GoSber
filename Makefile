@@ -14,6 +14,11 @@ prod:
 		GOOS=linux GOARCH=amd64 go build -o ./bin/sber-scrape-linux-amd64 -v ./cmd/sber-scrape; \
 	fi
 
+.PHONY: run
+
+run:
+	go run ./cmd/sber-scrape/main.go
+
 .PHONY: clean
 clean:
 	rm -f /bin/

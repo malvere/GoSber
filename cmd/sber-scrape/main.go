@@ -50,7 +50,7 @@ func main() {
 		log.Println("Scraping: ", urlFlag)
 		parseURL = urlFlag
 	} else {
-		parseURL = "https://megamarket.ru/catalog/?q=нарзан"
+		parseURL = "https://megamarket.ru/catalog/uhod-za-licom/"
 	}
 
 	// Send a GET request to the URL and parse

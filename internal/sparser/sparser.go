@@ -15,8 +15,63 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func GetHtml(url string, store store.Store) error {
+func parseItemBlock(itemBlock *goquery.Selection, store store.Store) {
+	// Helper function to extract text from an element and trim whitespace
+	getText := func(selector string) string {
+		return strings.TrimSpace(
+			strings.ReplaceAll(
+				itemBlock.Find(selector).Text(),
+				"\t",
+				"",
+			),
+		)
+	}
+	convInt := func(str string) (int, error) {
+		if str != "" {
+			regex := regexp.MustCompile("[^0-9]+")
+			result := regex.ReplaceAllString(str, "")
+			return strconv.Atoi(result)
+		}
+		return 0, nil
+	}
 
+	itemTitle := getText(".item-title")
+	itemPrice, _ := convInt(getText(".item-price"))
+	bonusAmount, _ := convInt(getText(".bonus-amount"))
+	bonusPercent, _ := convInt(getText(".bonus-percent"))
+	discount, _ := convInt(getText(".discount-percentage__value"))
+
+	// Extract productID and link attributes
+	productIDText, _ := itemBlock.Find(".ddl_product_link").Attr("data-product-id")
+	productID, _ := convInt(productIDText)
+	val, _ := itemBlock.Find(".ddl_product_link").Attr("href")
+	link := fmt.Sprintf("%s%s", "https://megamarket.ru", val)
+
+	p := &model.Product{
+		Title:        itemTitle,
+		Price:        itemPrice,
+		BonusAmount:  bonusAmount,
+		BonusPercent: bonusPercent,
+		Discount:     discount,
+		ProductID:    productID,
+		Link:         link,
+	}
+	if err := store.Product().Create(p); err != nil {
+		log.Fatal(err)
+		return
+	}
+	// Print the extracted data
+	fmt.Println("Title: ", itemTitle)
+	fmt.Println("Price: ", itemPrice)
+	fmt.Println("SBonuses: ", bonusAmount)
+	fmt.Println("SBonuses %: ", bonusPercent)
+	fmt.Println("Discount: ", discount)
+	fmt.Println("Product ID", productID)
+	fmt.Println("URL: ", link)
+	// fmt.Println("-" * 10)
+}
+
+func GetHtml(url string, store store.Store) error {
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -38,65 +93,12 @@ func GetHtml(url string, store store.Store) error {
 		log.Fatal(err)
 	}
 	doc.Find(".item-block").Each(func(index int, itemBlock *goquery.Selection) {
-		// Helper function to extract text from an element and trim whitespace
-		getText := func(selector string) string {
-			return strings.TrimSpace(
-				strings.ReplaceAll(
-					itemBlock.Find(selector).Text(),
-					"\t",
-					"",
-				),
-			)
-		}
-		convInt := func(str string) (int, error) {
-			if str != "" {
-				regex := regexp.MustCompile("[^0-9]+")
-				result := regex.ReplaceAllString(str, "")
-				return strconv.Atoi(result)
-			} else {
-				return 0, nil
-			}
-		}
-		itemTitle := getText(".item-title")
-		itemPrice, _ := convInt(getText(".item-price"))
-		bonusAmount, _ := convInt(getText(".bonus-amount"))
-		bonusPercent, _ := convInt(getText(".bonus-percent"))
-		discount, _ := convInt(getText(".discount-percentage__value"))
-
-		// Extract productID and link attributes
-		productIDText, _ := itemBlock.Find(".ddl_product_link").Attr("data-product-id")
-		productID, _ := convInt(productIDText)
-		val, _ := itemBlock.Find(".ddl_product_link").Attr("href")
-		link := fmt.Sprintf("%s%s", "https://megamarket.ru", val)
-
-		p := &model.Product{
-			Title:        itemTitle,
-			Price:        itemPrice,
-			BonusAmount:  bonusAmount,
-			BonusPercent: bonusPercent,
-			Discount:     discount,
-			ProductID:    productID,
-			Link:         link,
-		}
-		if err := store.Product().Create(p); err != nil {
-			log.Fatal(err)
-			return
-		}
-		// Print the extracted data
-		fmt.Println("Title: ", itemTitle)
-		fmt.Println("Price: ", itemPrice)
-		fmt.Println("SBonuses: ", bonusAmount)
-		fmt.Println("SBonuses %: ", bonusPercent)
-		fmt.Println("Discount: ", discount)
-		fmt.Println("Product ID", productID)
-		fmt.Println("URL: ", link)
-		// fmt.Println("-" * 10)
+		parseItemBlock(itemBlock, store)
 	})
 	return nil
 }
 
 func GetLocalHtml(filename string, store store.Store) error {
-
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -106,59 +108,23 @@ func GetLocalHtml(filename string, store store.Store) error {
 		log.Fatal(err)
 	}
 	doc.Find(".item-block").Each(func(index int, itemBlock *goquery.Selection) {
-		// Helper function to extract text from an element and trim whitespace
-		getText := func(selector string) string {
-			return strings.TrimSpace(
-				strings.ReplaceAll(
-					itemBlock.Find(selector).Text(),
-					"\t",
-					"",
-				),
-			)
-		}
-		convInt := func(str string) (int, error) {
-			if str != "" {
-				regex := regexp.MustCompile("[^0-9]+")
-				result := regex.ReplaceAllString(str, "")
-				return strconv.Atoi(result)
-			} else {
-				return 0, nil
-			}
-		}
-		itemTitle := getText(".item-title")
-		itemPrice, _ := convInt(getText(".item-price"))
-		bonusAmount, _ := convInt(getText(".bonus-amount"))
-		bonusPercent, _ := convInt(getText(".bonus-percent"))
-		discount, _ := convInt(getText(".discount-percentage__value"))
-
-		// Extract productID and link attributes
-		productIDText, _ := itemBlock.Find(".ddl_product_link").Attr("data-product-id")
-		productID, _ := convInt(productIDText)
-		val, _ := itemBlock.Find(".ddl_product_link").Attr("href")
-		link := fmt.Sprintf("%s%s", "https://megamarket.ru", val)
-
-		p := &model.Product{
-			Title:        itemTitle,
-			Price:        itemPrice,
-			BonusAmount:  bonusAmount,
-			BonusPercent: bonusPercent,
-			Discount:     discount,
-			ProductID:    productID,
-			Link:         link,
-		}
-		if err := store.Product().Create(p); err != nil {
-			log.Fatal(err)
-			return
-		}
-		// Print the extracted data
-		fmt.Println("Title: ", itemTitle)
-		fmt.Println("Price: ", itemPrice)
-		fmt.Println("SBonuses: ", bonusAmount)
-		fmt.Println("SBonuses %: ", bonusPercent)
-		fmt.Println("Discount: ", discount)
-		fmt.Println("Product ID", productID)
-		fmt.Println("URL: ", link)
-		// fmt.Println("-" * 10)
+		parseItemBlock(itemBlock, store)
 	})
+	return nil
+}
+
+func GetPages(url string, store store.Store, pages int) error {
+	for page := 1; page <= pages; page++ {
+		currurl := strings.Replace(
+			url,
+			"/catalog",
+			fmt.Sprintf("/catalog/page-%d", page),
+			1,
+		)
+		err := GetHtml(currurl, store)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

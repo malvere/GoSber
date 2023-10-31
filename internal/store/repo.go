@@ -10,4 +10,6 @@ type ProductRepo interface {
 	FindByProductId(int) (*model.Product, error)
 	FindAll() (*sql.Rows, error)
 	NewTable() error
+	BulkInsertProducts(products []model.Product) error
+	Transaction(products []model.Product) error
 }

@@ -21,6 +21,6 @@ run:
 
 .PHONY: clean
 clean:
-	rm -f /bin/
+	rm -f ./bin/*
 
 .DEFAULT_GOAL := build

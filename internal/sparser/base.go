@@ -9,7 +9,7 @@ import (
 	"sber-scrape/internal/store/sqlstore"
 )
 
-func Start(config *Config, url string, mode string) error {
+func Start(config *Config, url string, mode string, pages int) error {
 	store, db, err := selDB(config)
 	if err != nil {
 		log.Fatal(err)
@@ -18,7 +18,7 @@ func Start(config *Config, url string, mode string) error {
 	defer db.Close()
 	switch mode {
 	case "web":
-		if err := GetPages(url, store, 6); err != nil {
+		if err := GetPages(url, store, pages); err != nil {
 			log.Fatal(err)
 		}
 	case "local":
@@ -55,7 +55,7 @@ func selDB(config *Config) (store.Store, *sql.DB, error) {
 		}
 
 		if driver == "postgres" {
-			s = sqlstore.New(db)
+			s = sqlstore.New(db, config.DatabaseTableName)
 		} else {
 			s = litestore.New(db)
 		}

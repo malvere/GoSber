@@ -71,7 +71,52 @@ func parseItemBlock(itemBlock *goquery.Selection, store store.Store) {
 	// fmt.Println("-" * 10)
 }
 
+func bufferItemBlock(itemBlock *goquery.Selection) *model.Product {
+	// Helper function to extract text from an element and trim whitespace
+	getText := func(selector string) string {
+		return strings.TrimSpace(
+			strings.ReplaceAll(
+				itemBlock.Find(selector).Text(),
+				"\t",
+				"",
+			),
+		)
+	}
+	convInt := func(str string) (int, error) {
+		if str != "" {
+			regex := regexp.MustCompile("[^0-9]+")
+			result := regex.ReplaceAllString(str, "")
+			return strconv.Atoi(result)
+		}
+		return 0, nil
+	}
+
+	itemTitle := getText(".item-title")
+	itemPrice, _ := convInt(getText(".item-price"))
+	bonusAmount, _ := convInt(getText(".bonus-amount"))
+	bonusPercent, _ := convInt(getText(".bonus-percent"))
+	discount, _ := convInt(getText(".discount-percentage__value"))
+
+	// Extract productID and link attributes
+	productIDText, _ := itemBlock.Find(".ddl_product_link").Attr("data-product-id")
+	productID, _ := convInt(productIDText)
+	val, _ := itemBlock.Find(".ddl_product_link").Attr("href")
+	link := fmt.Sprintf("%s%s", "https://megamarket.ru", val)
+
+	p := &model.Product{
+		Title:        itemTitle,
+		Price:        itemPrice,
+		BonusAmount:  bonusAmount,
+		BonusPercent: bonusPercent,
+		Discount:     discount,
+		ProductID:    productID,
+		Link:         link,
+	}
+	return p
+}
+
 func GetHtml(url string, store store.Store) error {
+	var productArray []model.Product
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -93,8 +138,14 @@ func GetHtml(url string, store store.Store) error {
 		log.Fatal(err)
 	}
 	doc.Find(".item-block").Each(func(index int, itemBlock *goquery.Selection) {
-		parseItemBlock(itemBlock, store)
+		// parseItemBlock(itemBlock, store)
+		productArray = append(productArray, *bufferItemBlock(itemBlock))
 	})
+	// err = store.Product().BulkInsertProducts(productArray)
+	err = store.Product().Transaction(productArray)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return nil
 }
 

@@ -10,11 +10,13 @@ import (
 type Store struct {
 	db          *sql.DB
 	productRepo *ProductRepo
+	tableName   string
 }
 
-func New(db *sql.DB) *Store {
+func New(db *sql.DB, tableName string) *Store {
 	return &Store{
-		db: db,
+		db:        db,
+		tableName: tableName,
 	}
 }
 

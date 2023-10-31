@@ -7,3 +7,5 @@ sber.csv
 .html
 page.html
 .vscode/
+.*
+.sql

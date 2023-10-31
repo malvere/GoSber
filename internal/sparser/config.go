@@ -3,8 +3,9 @@ package sparser
 import "os"
 
 type Config struct {
-	DatabaseURL string `toml:"database_url"`
-	SQLiteURL   string `toml:"sqlite_url"`
+	DatabaseURL       string `toml:"database_url"`
+	SQLiteURL         string `toml:"sqlite_url"`
+	DatabaseTableName string
 }
 
 func NewConfig() (*Config, bool) {

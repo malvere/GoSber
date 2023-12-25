@@ -22,9 +22,9 @@ To get started with sber-scrape, follow the instructions below:
 
 2. Run with with flags if needed
     ```shell
-    ./sber-scrape -m <mode> -s <search-prompt> -u <url>
+    ./sber-scrape -mode <mode> -seatch <search-prompt> -table-name <url>
     ```
-
+    
 ### Building from source
 
 1. Clone this repository:
@@ -41,8 +41,25 @@ To get started with sber-scrape, follow the instructions below:
     ```
 3. Run
     ```shell
-    ./sber-scrape -m <mode> -s <search-prompt> -u <url>
+    ./sber-scrape -mode <mode> -search <search-prompt> 
     ```
+    3.1 Available Flags:
+
+    `-mode` - Mode to run in. <web> makes HTTP requests, while <local> searches for .html file.
+
+    `-search` - Searhces with specific prompt.
+
+    `-url` - Parses using predifined url. You can set up your search prompt with filters and then copy the url from megamarket and paste it to the scraper.
+
+    `-table-name` - Tables name in the DataBase.
+
+    `-pages` - How many pages to parse.
+
+    3.2 Usage:
+
+    If `-search` is passed, then it will search by your specific prompt.
+
+    If `-url` is passed, search will be done according to the specified link.
 ## PostgreSQL Connection
 If you have a PostgreSQL database, sber-scrape can connect to it by setting the DB_URL environment variable. The script will use it to establish a connection.
 

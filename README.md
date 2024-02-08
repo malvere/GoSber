@@ -45,7 +45,7 @@ To get started with sber-scrape, follow the instructions below:
     ```
     3.1 Available Flags:
 
-    `-mode` - Mode to run in. <web> makes HTTP requests, while <local> searches for .html file.
+    `-mode` - Mode to run in. <web> makes HTTP requests and parses HTML body, while <local> searches for .html file. <JSON> uses API requests and parses JSON body (preferred method).
 
     `-search` - Searhces with specific prompt.
 

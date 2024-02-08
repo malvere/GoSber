@@ -1,2 +1,2 @@
-database_url = "host=localhost dbname=sberscrape sslmode=disable"
+database_url = "host=localhost dbname=gosber sslmode=disable"
 sqlite_url = ":memory:"

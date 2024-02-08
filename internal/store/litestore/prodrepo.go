@@ -158,3 +158,46 @@ func (r *ProductRepo) Transaction(products []model.Product) error {
 	return nil
 
 }
+
+func (r *ProductRepo) JSONTransaction(products model.StripResponse) error {
+	txn, err := r.store.db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := txn.Prepare(pq.CopyIn(
+		"product_data",
+		"title",
+		"price",
+		"bonuses",
+		"bonus_percent",
+		"discount",
+		"product_id",
+		"link",
+	))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, p := range products.Items {
+		_, err := stmt.Exec(p.Goods.Title, p.Price, p.BonusAmount, p.BonusPercent, 0, p.Goods.GoodsID, p.Goods.WebURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = stmt.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = txn.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+
+}

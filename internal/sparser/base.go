@@ -25,6 +25,10 @@ func Start(config *Config, url string, mode string, pages int) error {
 		if err := GetLocalHtml("page.html", store); err != nil {
 			log.Fatal(err)
 		}
+	case "json":
+		if err := GetPagesJson(url, store, pages); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if store, ok := store.(*litestore.Store); ok {

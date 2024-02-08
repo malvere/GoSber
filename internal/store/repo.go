@@ -12,4 +12,5 @@ type ProductRepo interface {
 	NewTable() error
 	BulkInsertProducts(products []model.Product) error
 	Transaction(products []model.Product) error
+	JSONTransaction(products model.StripResponse) error
 }

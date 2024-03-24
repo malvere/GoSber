@@ -91,7 +91,9 @@ func (r *ProductRepo) BulkInsertProducts(products []model.Product) error {
 	// Batch size
 	batchSize := 100
 	productCount := len(products)
-
+	if productCount == 0 {
+		return sql.ErrNoRows
+	}
 	for i := 0; i < productCount; i += batchSize {
 		batchEnd := i + batchSize
 		if batchEnd > productCount {
@@ -119,7 +121,8 @@ func (r *ProductRepo) BulkInsertProducts(products []model.Product) error {
 func (r *ProductRepo) Transaction(products []model.Product) error {
 	txn, err := r.store.db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Transaction error: %v", err)
+		return err
 	}
 	stmt, err := txn.Prepare(pq.CopyIn(
 		"product_data",
@@ -160,44 +163,47 @@ func (r *ProductRepo) Transaction(products []model.Product) error {
 }
 
 func (r *ProductRepo) JSONTransaction(products model.StripResponse) error {
+	// Begin a transaction
 	txn, err := r.store.db.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	stmt, err := txn.Prepare(pq.CopyIn(
-		"product_data",
-		"title",
-		"price",
-		"bonuses",
-		"bonus_percent",
-		"discount",
-		"product_id",
-		"link",
-	))
+	defer txn.Rollback() // Rollback transaction if there's an error and it's not committed
+
+	// Prepare the INSERT statement
+	stmt, err := txn.Prepare(`INSERT INTO product_data (title, price, bonuses, bonus_percent, discount, product_id, link) VALUES (?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+	defer stmt.Close() // Close the prepared statement after use
+
+	// Batch size
+	batchSize := 100
+	productCount := len(products.Items)
+	if productCount == 0 {
+		return sql.ErrNoRows
 	}
 
-	for _, p := range products.Items {
-		_, err := stmt.Exec(p.Goods.Title, p.Price, p.BonusAmount, p.BonusPercent, 0, p.Goods.GoodsID, p.Goods.WebURL)
-		if err != nil {
-			log.Fatal(err)
+	for i := 0; i < productCount; i += batchSize {
+		batchEnd := i + batchSize
+		if batchEnd > productCount {
+			batchEnd = productCount
+		}
+
+		// Insert data for each product in the batch
+		for _, p := range products.Items[i:batchEnd] {
+			_, err := stmt.Exec(p.Goods.Title, p.Price, p.BonusAmount, p.BonusPercent, 0, p.Goods.GoodsID, p.Goods.WebURL)
+			if err != nil {
+				return err
+			}
 		}
 	}
-	_, err = stmt.Exec()
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	err = stmt.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	// Commit the transaction
 	err = txn.Commit()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	return nil
 
+	return nil
 }

@@ -33,7 +33,6 @@ func init() {
 }
 func main() {
 	flag.Parse()
-
 	config, isEnvLoaded := sparser.NewConfig()
 	if !isEnvLoaded {
 		_, err := toml.DecodeFS(cfg.ConfigFile, "config.toml", config)

@@ -6,6 +6,8 @@
 
 GoSber is a versatile GoLang script for web scraping. It offers multiple modes for scraping, the ability to specify search prompts, and the option to scrape specific links. Additionally, it can automatically connect to a PostgreSQL database using the `DB_URL` environment variable.
 
+Will soon include [parser and promo duplicator](https://github.com/malvere/SberCheck). Functionality will be combined in one project `SberTool`
+
 ## Features
 
 - Selection of different modes for customizable scraping
